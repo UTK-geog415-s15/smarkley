@@ -1,54 +1,80 @@
 ---
 title: "test"
-author: "Nicholas Nagle"
-date: "January 26, 2015"
-output: pdf_document
+author: "Scott Markley"
+date: "January 30, 2015"
+output: html_document
 ---
 # INSTRUCTIONS:
-Edit this file by replacing the instructions with text and code to anser the questions.
-I should be able to knit this file and reproduce the html, pdf, or word document.
 
 A block to load in the data:
 ```{r}
 rm(list=ls()) # Clean the workspace to be empty
-arbuthnot <- read.csv('/Users/nnagle/Dropbox/git_root/homework/homework1/data/arbuthnot.csv')
+arbuthnot <- read.csv('C:/Users/Owner/Desktop/UT_S15/GEOG415/snmarkley/homework1/data/arbuthnot.csv')
 ```
 
 # Question 1
-This is a question about how the axes affects how we interpret plots.
 
-Create two plots of Male-Female Christenings, one in which the y-axis scale is set by default, and one in which the y-axis extends all the way to zero.  Yes, I know that was in the tutorial.  I want to see it here.
+```{r}
+library(ggplot2)
+#load homework1 data
+arbuthnot<-read.csv("C:/Users/Owner/Desktop/UT_S15/GEOG415/snmarkley/homework1/data/arbuthnot.csv")
+#make plot with default settings
+ggplot(data=arbuthnot) + 
+     geom_line(aes(x=Year, y=Males, color='Male')) + 
+     geom_line(aes(x=Year, y=Females, color='Females')) + 
+     ylab('Christenings') + labs(color='Sex')
 
- - Describe the visual appearance of the two plots.  Do they "feel" like they describe the same data?  
- - Describe how you might be able to mislead readers by changing the scaling on graphs.  
+#make plot with y axis extending to zero
+ggplot(data=arbuthnot) + 
+               geom_line(aes(x=Year, y=Males, color='Male')) + 
+               geom_line(aes(x=Year, y=Females, color='Females')) +
+               scale_y_continuous(limits=c(0,9000)) +
+               ylab('Christenings') + labs(color='Sex')
+
+```
+
+ - Describe the visual appearance of the two plots.  Do they "feel" like they describe the same data?
+ 
+ Each plot shows a pattern of early decline in the two lines, followed by a dramatic, and then a more gradual increase, with more minor ups and downs throughout. However, the changes in the default plot appear much more distinct, with sharper increases and decreases. In addition, the gap between male and female christenings is much more apparent on the default plot. The two plots feel like they describe different data.
+ 
+ - Describe how you might be able to mislead readers by changing the scaling on graphs.
+  
+  Zooming in on this plot creates a more dramatic picture, with sharper changes in the christening rate through time and a larger gap between male and female christenings. Zooming out appears to smooth the changes across time, and it diminishes the gap between male and female christenings. Therefore, adjusting the plot's scale can have the effect of either emphasizing rather small differences/changes in the data or minimizing starker differences/changes in the data.
+   
  - Which plot seems more appropriate here?  Why?
-
+ 
+ I believe the default plot to be the more appropriate plot for these data. Both lines are entirely captured within the default plot, with only a minimum of excess plot space. In the plot with they y-axis extending to zero, there is about 2500 christenings-worth of excess plot space at the bottom.
+ 
 # Question 2
-This question is designed to give you some practice with ggplot as well as describing plots in words.
 
-Use ggplot to create a scatterplot that has Female christenings on the x-axis and Male christenings on the y-axis.  Draw a 45 degree line (using geom_abline) to show the line where Male and Female christenings are equal.  Use this figure to describe the relationship and distribution of Male and Female christenings.
+```{r}
+ggplot(data=arbuthnot) + 
+     geom_line(aes(x=Females, y=Males, color='Actual Ratio')) + 
+     geom_abline(aes(intercept=0, slope=1, color='1:1 Ratio')) +
+     ylab('Male Christenings') + xlab('Female Christenings') +
+     labs(color='Sex Ratio at Birth')
+```
 
-
+This plot indicates that for every number of female christenings, there are slightly more male christenings. The unusual shape of the "Actual Ratio" line is likely due to some random variation in the sample.
 
 # Question 3
 
-This is a question about population, sample, representativeness and generalizability.
+In Arbuthnot's time, the christenings-based sample would probably be more representative of the population than any births-based sample that would be available to him, since those records were likely not reliable then or would be too small for any meaningful analysis. However, in 17th-century London, even if Arbuthnot was able to come by reliable births-based data, the christenings-based sample would likely be very close, since both males and females were equally likely to be christened at birth (at least that's how I understand the christening process). The fact that Arbuthnot's sample included most every christening is significant if the unreported christenings had a sex bias. For example, if female christenings had been more likely than male christenings to go unreported, thus overrepresenting males in the sample, then it was important for the sample to include most every christening.
 
-How do you think the christenings-based sample would compared to a births-based sample?  Similar?  Different?  Why?  Arbuthnot's data probably included most every christening in London during this period; they probably aren't any unreported christenings.  Is this fact important?  Why or why not?  Would a christenings based sample be appropriate now, in the 21st century?  (Hint, this last question is trickier than it might seem.  Think about what causes Male/Female Births, what causes people to christen their children, and any relations or not between these)
+Although christenings-based samples would no longer be ideal in London since a much higher percentage of the population no longer gets christened and since there are much more reliable birth records kept by government agencies, there is no obvious bias favoring either males or females in christening (assuming Christians are not more or less likely to have either boys or girls than anyone else, and both boys and girls are equally christened). Thus, a christenings-based sample should still reasonably represent the sex ratio at birth of the population.
 
 # Question 4
-What does "sex ratio at birth" mean?  How does it depend on biology, cuture and technology.  Consider the three cases of 1) late 17th century England, 2) 21st century US, and China under the [one-child policy](http://en.wikipedia.org/wiki/One-child_policy).
 
+The "sex ratio at birth" describes the number of males born versus the number of females born. For example, a sex ratio at birth of 1.06 means that 1.06 males were born for every female, or that 106 males were born for every 100 females. One biological factor influencing the sex ratio at birth includes the higher likelihood that male sperm will fertilize the mother's egg, leading to a slightly higher chance that a mother will give birth to boy. Other biological factors affecting the baby's sex are also related to culture, including the father's age at conception (Jacobsen et. al. 1999) and birth order (Mathews et. al. 2005). In the first example, the researchers showed that more male babies were born to younger fathers than older fathers, and paternal age is closely tied to cultural norms about when to become a father. Similarly, the second research example showed that the sex ratio at birth was higher for mothers' first-born babies than babies born after the first. This is also tied to culture. For example, mothers in the U.S. today are more likely to bear only one child compared to mothers in 17th century England largely because of changes in cultural norms. Furthermore, in contemporary China, the family planning policy has made bearing only one child much more common than before the policy, having some effect on the sex ratio at birth. More significantly, due to the nature of the "one-child policy," a cultural preference for male children, and the advancement of ultrasound technology, sex-selected abortions have become more prevalent over the last few decades in China, skewing the sex ratio even further.
 
 # Question 5
-The purpose of this quetion is to give you a little practice using standard deviation.
 
-a. The average height of young women ages 18-24 is 64.5 in.  The distribution of heights is approximately normal (Gaussian) with a standardard deviation of $\sigma=2.5$.  Complete this sentence: Approximately 95% of women have a height greater than ______ in and less than ______ in.
+a. The average height of young women ages 18-24 is 64.5 in.  The distribution of heights is approximately normal (Gaussian) with a standard deviation of $\sigma=2.5$.  Complete this sentence: Approximately 95% of women have a height greater than __59.5__ in. and less than __69.5__ in.
 
 # Question 6
-The purpose of this question is to help you understand the variance.
 
 The formula for sample variance $\sigma^2$ of a dataset is:
 $$\frac{\sum_{i=1}^N (x_i - \bar{x})^2}{N-1}$$
 Describe in words what each part of this equation is, and using the concept of "distance" describe what the sample variance measures.
 
+The $(x_i - \bar{x})^2$ in the top right of the equation denotes that we will subtract the mean of all the observations from an individual observation and then square the results (squared deviations). The $\sum_{i=1}^N$ then denotes that we will summarize these results from each observation (sum of squared deviations). The ${N-1}$ at the bottom of the equation denotes that we will then divide the results from the top by the number of observations minus one. The sample variance measures the average squared distance of the observations from the mean of the observations.
