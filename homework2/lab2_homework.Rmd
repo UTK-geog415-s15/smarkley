@@ -1,49 +1,86 @@
 ---
 title: "lab2_homework"
-author: "Nicholas Nagle"
-date: "February 2, 2015"
+author: "Scott Markley"
+date: "February 16, 2015"
 output: html_document
 ---
 
+```{r load libraries, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+```
+
 # Part 1. Analysis of El Malpais data
 
-What do the tree ring data tell us about monthly precipitation?
+The tree ring data suggest that precipitation in certain months has a stronger relationship with annual tree ring width than precipitation in other months.
 
-Write up a short report (~ 2 paragraphs) answering the following questions:
+  The summer months experienced the greatest amount of rainfall during the study period, ranging from slightly under 2 inches in September to over 2.5 inches in both July and August, as seen in the "Precipitation by Month" bar chart pictured below. According to the same chart December and October were the only other two months with precipitation at or above one inch, while the rest of the months hovered between about 0.5 inches (May) to about 0.8 inches (January, February, and March). Tree ring width is most positively correlated with January precipitation, yielding a correlation coefficient of slightly over 0.3, as seen in red in the "correlation between RWI & Precipitation by Month" plot below. This plot also shows that following January, February precipitation also has a relatively high correlation with tree ring width. Rounding out the top six behind January and February in order are May, April, July, and then March, though each have fairly weak correlation coefficients of about 0.24 to 0.28. Additionally, from the same chart (shown in blue), the correlation is even stronger for January, February, and March when calculating r values with lagged precipitation data. 
+  Overall, linear correlation is an appropriate way to measure the relationship between monthly precipitation and tree ring width. As the "Annual RWI vs. January Precipitation" and the "Annual RWI vs. August Precipitation" scatterplots show, this method does yield some useful results (i.e. an approximate positive association exists between January precipitation and RWI and no discernable relationship exists between August precipitation and RWI). However, for January, which has the the highest correlation coefficient of all the months, the relationship is only slightly positive, and as evidenced from the scatterplot, a good bit of variation exists.
+  Finally, with regards to the last question (which I am not sure if I am interpreting correctly), according to the "Correlation between RWI & Precipitation by Month" plot, I would choose the 12 month period preceding the current year. In this plot, the lagged year r values appear to be, on average, stronger than the current year r values.
 
-- Describe the monthly rainfall pattern.  
-- During what months is tree ring width correlated with rainfall?
-- How appropriate is (linear) correlation as a description of the relationship between tree ring width and monthly rainfall?
-- If you had to create a 12 month period that was correlated with tree ring width, what 12 months would those be?
+```{r}
+load("C:/Users/Owner/Desktop/UT_S15/GEOG415/snmarkley/homework2/tidy.precip.R")
+#Bar chart
+tidy.precip %>% group_by(month) %>%
+    summarize(precip=mean(precip, na.rm=TRUE)) %>%
+    ggplot(data=., aes(month, precip)) + geom_bar(stat='identity') + 
+    labs(x = 'Month', y = 'Precipitation (in)') +
+    ggtitle('Precipitation by Month: 1895 to 2014')
 
-In answering these questions, I want to see:
+```
 
- - A bar chart or line graph showing average rainfall each month.
- - Two scatterplots of tree ring width and precipitation, one with the current January, and one with the current August.  Use these to assess whether the relationship is approximately linear or not at all linear.
- - Two (or one) plots showing the correlation at every month between tree ring width and precipitation, for both the current year and the previous year.  If you can get both current and previous (lagged) year on one plot, then great.
+```{r}
+load("C:/Users/Owner/Desktop/UT_S15/GEOG415/snmarkley/homework2/rwi.precip.R")
+##Scatterplots
+#January
+rwi.precip %>% filter(month=='Jan') %>%
+     ggplot(data=., aes(precip,rwi)) + geom_point(stat='identity') +
+     labs(x='January Precipitation (in)', y='Annual RWI') +
+     geom_smooth(method=lm, se=FALSE) +
+     ggtitle('Annual RWI vs. January Precipitation')
+     
+  #August
+rwi.precip %>% filter(month=='Aug') %>%
+     ggplot(data=., aes(precip,rwi)) + geom_point(stat='identity') +
+     labs(x='August Precipitation (in)', y='Annual RWI') +
+     geom_smooth(method=lm, se=FALSE) +
+     ggtitle('Annual RWI vs. August Precipitation')
+
+```
  
- Make sure that your charts are properly labeled and are referred to in your answer.
+```{r}
+##Plots
+# I collaborated with Kyle in order to plot both current and lagged year on the same plot.
+cor <- rwi.precip %>% group_by(month) %>% summarize(r=cor(rwi, precip, use='complete.obs'))
+cor.lag <- rwi.precip %>% group_by(month) %>% summarize(r = cor(rwi, lag(precip),use='complete.obs'))
+cor.both <- left_join(cor, cor.lag, by='month')
+colnames(cor.both) <- c("month", "cor", "cor.lag")
+ggplot(data=cor.both) + geom_point(aes(x=month, y=cor, color='Current year')) + 
+                        geom_point(aes(x=month, y=cor.lag, color='Lagged year')) + 
+                        labs(color='Correlation of:') + 
+                        labs(x='Precipitation by Month', y= 'Correlation with RWI (r-value)') +
+                        geom_abline(intercept=0, slope=0) + 
+                        ggtitle('Correlation between RWI & Precipitation by Month: \n Current year & lagged year')
+
+```
+ 
 
 # Part 2: Getting the interpretation of correlation correct.
 
+1. The second statement is more correct. Since a positive relationship between annual tree ring width and January precipitation would suggest wetter Januarys correlating with wider tree ring widths, one would conversely expect dryer Januarys to correlate with narrower tree ring widths. With regards to the first statement, Januarys are not usually wetter than the average month, and thus January precipitation relative to other months is not a sufficient explanation for why January precipitation levels positively correlate with annual tree ring width.
 
-1. In regard to the first part, which of the following is more correct and explain.
-  - A positive correlation between tree ring width and January precipitation might happen because January is often (but not always) wetter than the average month.
-  - A positive correlation between tree ring width and January precipitation might happen if dryer-than-average Januarys are associate with smaller-than-average tree ring widths.
+2.  The correlation would be negative because as the age of the car goes up, the price would (in most cases) go in the opposite direction. Taking antique cars into account would change that relationship though, since they typically go for higher prices. Then, as the age of cars goes up, their prices would go down until a certain point (50 years?) and then start going up again if the owner takes proper care of the vehicle.
 
-2. 
-  - Would the correlation between the age of a second-hand car and its price be positive or negative?  Why?  (Antiques are not included.)
-  - How would including antique cars change your response?
+3. False, the correlation coefficient is a standardized measure of the linear relationship between two variables that ranges from -1 to +1. It does not say what percentage of points are highly correlated.
 
-3. True or False, and explain: if the correlation coefficient is 0.90, then 90% of the points are highly correlated.
 
-4. An economist is studying the relationship between household income and teenage pregnancy in the United States.  She has data for each of the 50 states, showing the average household income of families with teenagers, and the rates of pregnancy among teenage girls in that state.  The correlation is 0.4.  Does this give a fair estimate of th e strength of the association between household income and teenage pregnancy?  Explain.
+4. No, this study does not provide a fair estimate for this association because the researcher uses state-level aggregates, making her analysis susceptible to the modifiable areal unit problem. Because the correlation between household income and rates of teenage pregnancy is 0.4 at the state level does not mean that relationship would hold at the individual level or even at different spatial scales.
 
-5. Three data sets are collected and the correlation coefficient is computed in each case.  The variables in the datasets are:
-  - grade point average in freshman year and sophomore year in college.
-  - grade point average in freshman year and senior year in college.
-  - length and weight of two-by-four boards of lumber.
-  
-  Possible values for correlation coefficients are: -0.5,   0.0,   0.3,  0.6,  0.95.  Match the correlations with the data sets; two will be left over.  Explain your answers.
+5. GPA in freshman year and sophomore year in college would likely have a correlation coefficient of 0.6. This is because the grades of individual college students are likely to be very similar between years (i.e. positive correlation), although grades may not be exactly the same because of changes in course difficulty, students' adaptability to the college environment, changes in student attitudes toward education, etc. Therefore, I would expect a fairly high correlation, but not a perfect or near perfect correlation.
+  GPA in freshman year and senior year in college would likely have a correlation coefficient of 0.3. There is probably some positive association between student performances at the beginning and at the end of college (e.g. students who earn high grades their freshman years are usually more likely to earn high grades their senior years). However, since more time has based between freshman and senior years than between freshman and sophomore years, I would expect that association to not be as strong.
+  Length and weight of two-by-four boards would have a correlation coefficient close to 0.95. This is because as length increases, weight would almost definitely also increase since the dimensions are proportional. 
 
-6. Studies find a negative correlation between hours spent watching television and scores on reading tests.  Does watching television make people less able to read?  Discuss briefly.
+6. Probably not. Spending more hours watching television suggests that one will be foregoing opportunities to read, adversely affecting his/her reading ability. In other words, since someone is watching more television, he/she has less time to dedicate to reading and will therefore likely not score as well on reading test as his/her peers that watch less television.
+
