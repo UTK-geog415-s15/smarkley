@@ -1,8 +1,8 @@
 ---
-title: "test"
+title: "Homework 1"
 author: "Scott Markley"
 date: "January 30, 2015"
-output: html_document
+output: pdf_document
 ---
 # INSTRUCTIONS:
 
